@@ -8,6 +8,11 @@
 import SwiftUI
 
 struct AddView: View {
+    private enum Constants {
+        static let textFieldTitle = "what do you need to do ?"
+        static let navigationTitle = "add an Item 💨"
+    }
+    
     @Binding var todoItemText: String
     @EnvironmentObject var viewModel: ListViewModel
     @Environment(\.dismiss) var dismiss
@@ -17,7 +22,7 @@ struct AddView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
-                TextField("what do you need to do ?", text: $todoItemText)
+                TextField(Constants.textFieldTitle, text: $todoItemText)
                     .foregroundColor(.black)
                     .padding(.horizontal)
                     .frame(height: 55)
@@ -35,6 +40,7 @@ struct AddView: View {
                     }
                     if !viewModel.isEmptyField {
                         dismiss()
+                        viewModel.currentToDoItemText = ""
                     }
                 } label: {
                     Label("add", systemImage: "plus")
@@ -52,7 +58,7 @@ struct AddView: View {
             }
             .padding(16)
         }
-        .navigationTitle("add an Item 💨")
+        .navigationTitle(Constants.navigationTitle)
     }
 }
 

@@ -8,11 +8,14 @@
 import SwiftUI
 
 struct ListView: View {
-    @EnvironmentObject var viewModel: ListViewModel
-    
     private enum Constants {
         static let navigationTitle = "cloudList ☁️"
+        static let cloudIsEmptyText = "cloud is empty"
+        static let cloudSunImageName = "cloud.sun"
+        static let addText = "add"
     }
+    
+    @EnvironmentObject var viewModel: ListViewModel
     
     var body: some View {
         Group {
@@ -20,14 +23,14 @@ struct ListView: View {
                 makeListView()
             } else {
                 VStack(spacing: 2) {
-                    Image(systemName: "cloud.sun")
+                    Image(systemName: Constants.cloudSunImageName)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 44, height: 44)
-                    Text("cloud is empty")
+                    Text(Constants.cloudIsEmptyText)
                         .font(.callout)
                 }
-                .animation(.easeIn(duration: 2), value: viewModel.itemsEmpty) // does not work
+                .animation(.easeIn(duration: 2), value: viewModel.itemsEmpty) // does not work :(
                 .opacity(0.5)
             }
         }
@@ -41,7 +44,7 @@ struct ListView: View {
             }
 
             ToolbarItem(placement: .navigationBarTrailing) {
-                NavigationLink("Add") {
+                NavigationLink(Constants.addText) {
                     AddView(todoItemText: $viewModel.currentToDoItemText)
                 }
             }

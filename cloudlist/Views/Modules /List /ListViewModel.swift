@@ -34,13 +34,13 @@ final class ListViewModel: ObservableObject {
         domainModel.$items
             .assign(to: &$items)
         
-        /// subscription to save items on change
-        $items
-            .dropFirst()
-            .sink { [weak self] items in
-                self?.saveItems(items: items)
-            }
-            .store(in: &cancellables)
+        /// subscription to save items on change, should be moved to the domain model
+//        $items
+//            .dropFirst()
+//            .sink { [weak self] items in
+//                self?.saveItemsToDefaults(items: items)
+//            }
+//            .store(in: &cancellables)
     }
     
     // MARK: Input
@@ -57,7 +57,7 @@ final class ListViewModel: ObservableObject {
     // MARK: Data Manupilation
     
     func deleteItem(indexSet: IndexSet) {
-        domainModel.items.remove(atOffsets: indexSet)
+        domainModel.deleteItem(indexSet: indexSet)
     }
     
     func moveItem(from: IndexSet, to: Int) {
@@ -66,16 +66,19 @@ final class ListViewModel: ObservableObject {
     
     func createAndAppend() {
         guard !currentToDoItemText.isEmpty else { return }
-        domainModel.items.append(Item(title: currentToDoItemText))
+        domainModel.createAndAppend(item: .init(id: UUID().uuidString, title: currentToDoItemText))
     }
     
     func onUpdateItem(_ item: Item) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             domainModel.items[index] = item.updateCompletion()
+            domainModel.updateItem(item: item.updateCompletion())
         }
     }
     
+    // MARK: Persistence
+    
     func saveItems(items: [Item]) {
-        domainModel.saveItems(items: items)
+        domainModel.saveItemsToDefaults(items: items)
     }
 }

@@ -7,21 +7,21 @@
 
 import Foundation
 
-fileprivate enum Constants {
-    enum DictionaryKeys {
-        static let id = "id"
-        static let title = "title"
-        static let isCompleted = "isCompleted"
-    }
-}
-
 struct Item: Identifiable, Codable {
+    enum Constants {
+        enum DictionaryKeys {
+            static let id = "id"
+            static let title = "title"
+            static let isCompleted = "isCompleted"
+        }
+    }
+    
     let id: String
     let title: String
     let isCompleted: Bool
     
     init(
-        id: String = UUID().uuidString,
+        id: String,
         title: String,
         isCompleted: Bool = false
     ) {
@@ -30,10 +30,13 @@ struct Item: Identifiable, Codable {
         self.isCompleted = isCompleted
     }
     
-    init(keyId: String, dictionary: [String: Any]) {
+    init(
+        keyId: String,
+        dictionary: [String: Any]
+    ) {
         self.title = dictionary[Constants.DictionaryKeys.title] as? String ?? ""
         self.isCompleted = dictionary[Constants.DictionaryKeys.isCompleted] as? Bool ?? false
-        self.id = keyId
+        self.id = dictionary[Constants.DictionaryKeys.id] as? String ?? ""
     }
     
     func updateCompletion() -> Item {
@@ -42,15 +45,28 @@ struct Item: Identifiable, Codable {
 }
 
 extension Item {
+    func createDictionary() -> [AnyHashable: Any] {
+        [
+            Constants.DictionaryKeys.title: self.title,
+            Constants.DictionaryKeys.isCompleted: self.isCompleted,
+            Constants.DictionaryKeys.id: self.id
+        ]
+    }
+}
+
+extension Item {
     static let stubItem1 = Item(
+        id: "dsafkjasdl",
         title: "stub",
         isCompleted: true
     )
     static let stubItem2 = Item(
+        id: "dsafkjasdl",
         title: "stub2",
         isCompleted: false
     )
     static let stubItem3 = Item(
+        id: "dsafkjasdl",
         title: "stub3",
         isCompleted: true
     )

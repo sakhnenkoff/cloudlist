@@ -9,15 +9,18 @@ import Foundation
 import Combine
 import Firebase
 
-protocol DataManagerProtocol {
-    func loadData()
-    func updateData(with items: [Item])
+protocol NetworkServiceProtocol {
+    func loadData(completion: @escaping ([Item]) -> ())
+    func saveToDatabase(item: Item, completion: @escaping (Error?, DatabaseReference) -> ())
+    func updateStatus(for item: Item, completion: @escaping (Error?, DatabaseReference) -> ())
+    func deleteItem(_ id: String, completion: @escaping (Error?, DatabaseReference) -> ())
 }
-
-protocol NetworkServiceProtocol: DataManagerProtocol {}
-protocol PersistenceServiceProtocol: DataManagerProtocol {
+protocol PersistenceServiceProtocol {
     var itemPublisher: Published<[Item]>.Publisher { get }
     var defaults: UserDefaults { get }
+    
+    func loadData()
+    func updateData(with items: [Item])
 }
 
 final class NetworkService: NetworkServiceProtocol {
@@ -27,24 +30,48 @@ final class NetworkService: NetworkServiceProtocol {
     
     private lazy var dbREF = Database.database().reference()
     
-    func loadData() {
-        dbREF.child(Constants.itemsObject).observe(.childAdded) { snapshot in
-            print(snapshot)
-        }
+    // MARK: Uploading & Downloading Data
+    
+    func loadData(completion: @escaping ([Item]) -> ()) {
+        var fetchedItems = [Item]()
         
-        fetchSingleItem(by: "item1")
-    }
-    
-    func fetchSingleItem(by keyId: String) {
-        dbREF.child(Constants.itemsObject).observeSingleEvent(of: .value) { (snaphot, _l) in
-            guard let dict = snaphot.value as? [String: Any] else { return }
-            let item = Item(keyId: keyId, dictionary: dict)
-            print(item)
+        dbREF.child(Constants.itemsObject).observe(.childAdded) { [weak self] snapshot in
+            guard let self = self else { return }
+            self.fetchSingleItem(by: snapshot.key) { item in
+                fetchedItems.append(item)
+                completion(fetchedItems)
+            }
         }
     }
     
-    func updateData(with items: [Item]) {
-        print("data has been updated")
+    func fetchSingleItem(by keyId: String, completion: @escaping (Item) -> ()) {
+        dbREF.child(Constants.itemsObject).child(keyId).observeSingleEvent(of: .value) { (snaphot, _) in
+            guard let dict = snaphot.value as? [String: Any] else { return }
+            completion(Item(keyId: keyId, dictionary: dict))
+        }
+    }
+    
+    func saveToDatabase(item: Item, completion: @escaping (Error?, DatabaseReference) -> ()){
+        let dict = item.createDictionary()
+        let id = dbREF.child(Constants.itemsObject).childByAutoId()
+        id.updateChildValues(dict, withCompletionBlock: completion)
+        id.updateChildValues(dict) { [weak self] error, ref in
+            guard let self = self else { return }
+            guard let key = id.key else { return } // handle error
+            let value = [Item.Constants.DictionaryKeys.id: key]
+            self.dbREF.child(Constants.itemsObject).child(key).updateChildValues(value, withCompletionBlock: completion)
+        }
+    }   
+    
+    // MARK: Updating Items
+    
+    func updateStatus(for item: Item, completion: @escaping (Error?, DatabaseReference) -> ()) {
+        let values = item.createDictionary()
+        dbREF.child(Constants.itemsObject).child(item.id).updateChildValues(values, withCompletionBlock: completion)
+    }
+    
+    func deleteItem(_ id: String, completion: @escaping (Error?, DatabaseReference) -> ()) {
+        dbREF.child(Constants.itemsObject).child(id).removeValue(completionBlock: completion)
     }
 }
 
@@ -57,10 +84,6 @@ final class PersistenceService: PersistenceServiceProtocol {
      
     var itemPublisher: Published<[Item]>.Publisher { $fetchedItems }
     var defaults: UserDefaults = .standard
-    
-    init() {
-        loadData()
-    }
     
     func loadData() {
         guard
