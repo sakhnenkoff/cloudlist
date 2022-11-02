@@ -9,6 +9,12 @@ import Foundation
 import Combine
 import Firebase
 
+enum FirebaseError: String, Error {
+    case failedToSaveData = "Failed To Save Data 🐞"
+    case failedToFetchData = "Failed To Fetch Data 🐞"
+    case unknownError = "Unknown Error 🐞"
+}
+
 protocol NetworkServiceProtocol {
     func loadData(completion: @escaping ([Item]) -> ())
     func saveToDatabase(item: Item, completion: @escaping (Error?, DatabaseReference) -> ())
@@ -45,23 +51,28 @@ final class NetworkService: NetworkServiceProtocol {
     }
     
     func fetchSingleItem(by keyId: String, completion: @escaping (Item) -> ()) {
-        dbREF.child(Constants.itemsObject).child(keyId).observeSingleEvent(of: .value) { (snaphot, _) in
+        dbREF
+            .child(Constants.itemsObject)
+            .child(keyId)
+            .observeSingleEvent(of: .value)
+        { (snaphot, _) in
             guard let dict = snaphot.value as? [String: Any] else { return }
             completion(Item(keyId: keyId, dictionary: dict))
         }
     }
     
-    func saveToDatabase(item: Item, completion: @escaping (Error?, DatabaseReference) -> ()){
+    func saveToDatabase(item: Item, completion: @escaping (Error?, DatabaseReference) -> ()) {
         let dict = item.createDictionary()
         let id = dbREF.child(Constants.itemsObject).childByAutoId()
         id.updateChildValues(dict, withCompletionBlock: completion)
+        
         id.updateChildValues(dict) { [weak self] error, ref in
-            guard let self = self else { return }
-            guard let key = id.key else { return } // handle error
+            guard let self = self, let key = id.key else { return } // handle error
+            
             let value = [Item.Constants.DictionaryKeys.id: key]
             self.dbREF.child(Constants.itemsObject).child(key).updateChildValues(value, withCompletionBlock: completion)
         }
-    }   
+    }
     
     // MARK: Updating Items
     

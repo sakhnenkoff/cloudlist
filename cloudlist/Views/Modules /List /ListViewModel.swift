@@ -13,6 +13,7 @@ final class ListViewModel: ObservableObject {
     @Published var currentToDoItemText: String = ""
     @Published var shouldShakeView = false
     @Published var shakeOffset: CGFloat = 0
+    @Published var isDataLoading = false
     
     private var domainModel: AppDomainModel
     
@@ -34,11 +35,14 @@ final class ListViewModel: ObservableObject {
         domainModel.$items
             .assign(to: &$items)
         
+        domainModel.$isDataLoading
+            .assign(to: &$isDataLoading)
+        
         /// subscription to save items on change, should be moved to the domain model
 //        $items
 //            .dropFirst()
 //            .sink { [weak self] items in
-//                self?.saveItemsToDefaults(items: items)
+//                self?.domainModel.saveToDatabase(items: items)
 //            }
 //            .store(in: &cancellables)
     }
@@ -56,8 +60,8 @@ final class ListViewModel: ObservableObject {
     
     // MARK: Data Manupilation
     
-    func deleteItem(indexSet: IndexSet) {
-        domainModel.deleteItem(indexSet: indexSet)
+    func deleteItem(indexSet: IndexSet, items: [Item]) {
+        domainModel.deleteItem(indexSet: indexSet, items: items)
     }
     
     func moveItem(from: IndexSet, to: Int) {
@@ -71,7 +75,7 @@ final class ListViewModel: ObservableObject {
     
     func onUpdateItem(_ item: Item) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
-            domainModel.items[index] = item.updateCompletion()
+//            domainModel.items[index] = item.updateCompletion()
             domainModel.updateItem(item: item.updateCompletion())
         }
     }

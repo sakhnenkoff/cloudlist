@@ -21,6 +21,7 @@ struct ListView: View {
         Group {
             if !viewModel.itemsEmpty {
                 makeListView()
+                    .disabled(viewModel.isDataLoading)
             } else {
                 VStack(spacing: 2) {
                     Image(systemName: Constants.cloudSunImageName)
@@ -32,6 +33,11 @@ struct ListView: View {
                 }
                 .animation(.easeIn(duration: 2), value: viewModel.itemsEmpty) // does not work :(
                 .opacity(0.5)
+            }
+        }
+        .overlay {
+            if viewModel.isDataLoading {
+                ProgressView()
             }
         }
         .navigationTitle(Constants.navigationTitle)
@@ -55,7 +61,9 @@ struct ListView: View {
     func makeListView() -> some View {
         List {
             ForEach(viewModel.items) { ListRowView($0, position: viewModel.position(of: $0)) }
-                .onDelete(perform: viewModel.deleteItem)
+                .onDelete(perform: { indexset in
+                    viewModel.deleteItem(indexSet: indexset, items: viewModel.items)
+                })
                 .onMove(perform: viewModel.moveItem)
         }
         .listStyle(.plain)
