@@ -31,7 +31,6 @@ struct Item: Identifiable, Codable {
     }
     
     init(
-        keyId: String,
         dictionary: [String: Any]
     ) {
         self.title = dictionary[Constants.DictionaryKeys.title] as? String ?? ""

@@ -25,6 +25,7 @@ final class AppDomainModel {
         self.networkService = networkService
         self.persistenceService = persistenceService
         
+        #warning("for debug purposes only")
         $items.sink { items in
             print("\(items) 🐞")
         }
@@ -36,7 +37,6 @@ final class AppDomainModel {
     }
     
     // MARK: Output
-    
     func viewWillApeear() {
         fetchFromDatabase()
     }
@@ -45,15 +45,17 @@ final class AppDomainModel {
         saveToDatabase(item: item)
     }
     
-    func deleteItem(indexSet: IndexSet, items: [Item]) {
-        // preserve all ids to be deleted to avoid indices confusing
-        let idsToDelete = indexSet.compactMap { items[$0].id }
-        
-        _ = idsToDelete.compactMap { [weak self] id in
-            self?.networkService.deleteItem(id) { error, _ in
-                if error == nil {
-                    DispatchQueue.main.async {
-                        self?.items.removeAll { $0.id == id }
+    func deleteItem(indexSet: IndexSet) {
+        fetchFromDatabase { [weak self] in
+            guard let self = self else { return }
+            let idsToDelete = indexSet.compactMap { self.items[$0].id }
+            
+            _ = idsToDelete.compactMap { [weak self] id in
+                self?.networkService.deleteItem(id) { error, _ in
+                    if error == nil {
+                        DispatchQueue.global().sync {
+                            self?.items.removeAll { $0.id == id }
+                        }
                     }
                 }
             }
@@ -65,11 +67,13 @@ final class AppDomainModel {
     /// load items and publishes them one by one from the databse
     ///
     /// should be optimised in the future
-    func fetchFromDatabase() {
+    func fetchFromDatabase(completion: (() -> Void)? = nil) {
+        isDataLoading = true
         networkService.loadData { [weak self] items in
             DispatchQueue.main.async {
                 self?.items = items
                 self?.isDataLoading = false
+                completion?()
             }
         }
     }
@@ -93,19 +97,15 @@ final class AppDomainModel {
     
     /// update status for the particular item in the database
     func updateItem(item: Item) {
+        isDataLoading = true
         networkService.updateStatus(for: item) { error, _ in
             if let error { print(error.localizedDescription) }
         }
+        
+        fetchFromDatabase()
     }
     
-//    func saveToDatabase(items: [Item]) {
-//        networkService.saveToDatabase(items: items) { error, _ in
-//            if let error { print(error.localizedDescription) }
-//        }
-//    }
-    
     // MARK: Persistence
-    
     func configurePersistence() {
         persistenceService.itemPublisher
             .assign(to: &$items)

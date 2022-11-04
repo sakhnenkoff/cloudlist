@@ -19,6 +19,8 @@
 		83585EA328F1EAB90053EDF6 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83585EA228F1EAB90053EDF6 /* Item.swift */; };
 		83585EA628F1EB3F0053EDF6 /* AppDomainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83585EA528F1EB3F0053EDF6 /* AppDomainModel.swift */; };
 		83585EAC28F1EBD50053EDF6 /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83585EAB28F1EBD50053EDF6 /* ListViewModel.swift */; };
+		83C9FC2C29140A5400249E0F /* DefaultsPersistenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C9FC2B29140A5400249E0F /* DefaultsPersistenceManager.swift */; };
+		83C9FC2F29140A6C00249E0F /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C9FC2E29140A6C00249E0F /* NetworkManager.swift */; };
 		83D5094C28F883380088DE88 /* AppFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D5094B28F883380088DE88 /* AppFactory.swift */; };
 		83D5094E28F88B280088DE88 /* Shake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D5094D28F88B280088DE88 /* Shake.swift */; };
 		83D5095028FB125B0088DE88 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 83D5094F28FB125B0088DE88 /* GoogleService-Info.plist */; };
@@ -53,6 +55,8 @@
 		83585EA228F1EAB90053EDF6 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		83585EA528F1EB3F0053EDF6 /* AppDomainModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDomainModel.swift; sourceTree = "<group>"; };
 		83585EAB28F1EBD50053EDF6 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
+		83C9FC2B29140A5400249E0F /* DefaultsPersistenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultsPersistenceManager.swift; sourceTree = "<group>"; };
+		83C9FC2E29140A6C00249E0F /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		83D5094B28F883380088DE88 /* AppFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFactory.swift; sourceTree = "<group>"; };
 		83D5094D28F88B280088DE88 /* Shake.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shake.swift; sourceTree = "<group>"; };
 		83D5094F28FB125B0088DE88 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -103,6 +107,7 @@
 		83585E8028F1D9FA0053EDF6 /* cloudlist */ = {
 			isa = PBXGroup;
 			children = (
+				83C9FC2A29140A3F00249E0F /* Services */,
 				83585E9B28F1DEC20053EDF6 /* Extensions */,
 				83585E8F28F1DA1D0053EDF6 /* Models */,
 				83585E9728F1DA9B0053EDF6 /* Views */,
@@ -192,6 +197,15 @@
 				83585E9528F1DA5F0053EDF6 /* AddView.swift */,
 			);
 			path = Add;
+			sourceTree = "<group>";
+		};
+		83C9FC2A29140A3F00249E0F /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				83C9FC2B29140A5400249E0F /* DefaultsPersistenceManager.swift */,
+				83C9FC2E29140A6C00249E0F /* NetworkManager.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -288,12 +302,14 @@
 				83585EAC28F1EBD50053EDF6 /* ListViewModel.swift in Sources */,
 				83D5094C28F883380088DE88 /* AppFactory.swift in Sources */,
 				83D5094E28F88B280088DE88 /* Shake.swift in Sources */,
+				83C9FC2C29140A5400249E0F /* DefaultsPersistenceManager.swift in Sources */,
 				83585E9D28F1DECB0053EDF6 /* UIApplication + Extensions.swift in Sources */,
 				83585EA028F1E19E0053EDF6 /* Color + Extensions.swift in Sources */,
 				83585E9628F1DA5F0053EDF6 /* AddView.swift in Sources */,
 				83585E9A28F1DACC0053EDF6 /* AppTextFieldStyle.swift in Sources */,
 				83585EA328F1EAB90053EDF6 /* Item.swift in Sources */,
 				83585EA628F1EB3F0053EDF6 /* AppDomainModel.swift in Sources */,
+				83C9FC2F29140A6C00249E0F /* NetworkManager.swift in Sources */,
 				83585E8228F1D9FA0053EDF6 /* cloudlistApp.swift in Sources */,
 				83585E9228F1DA4A0053EDF6 /* ListRowView.swift in Sources */,
 				83585E9428F1DA560053EDF6 /* ListView.swift in Sources */,

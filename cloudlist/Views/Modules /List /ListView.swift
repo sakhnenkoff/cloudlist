@@ -22,21 +22,16 @@ struct ListView: View {
             if !viewModel.itemsEmpty {
                 makeListView()
                     .disabled(viewModel.isDataLoading)
-            } else {
-                VStack(spacing: 2) {
-                    Image(systemName: Constants.cloudSunImageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 44, height: 44)
-                    Text(Constants.cloudIsEmptyText)
-                        .font(.callout)
-                }
-                .animation(.easeIn(duration: 2), value: viewModel.itemsEmpty) // does not work :(
-                .opacity(0.5)
+            } else if viewModel.shouldDisplayEmptyItemsView {
+                makeEmptyItemsView()
             }
         }
         .overlay {
-            if viewModel.isDataLoading {
+            if viewModel.isDataLoading && viewModel.itemsEmpty {
+                ProgressView("☁️ is loading")
+                    .progressViewStyle(.circular)
+                    .padding()
+            } else if viewModel.isDataLoading {
                 ProgressView()
             }
         }
@@ -58,15 +53,28 @@ struct ListView: View {
         .tint(.theme.cloudBlue)
     }
     
-    func makeListView() -> some View {
+    private func makeListView() -> some View {
         List {
             ForEach(viewModel.items) { ListRowView($0, position: viewModel.position(of: $0)) }
                 .onDelete(perform: { indexset in
-                    viewModel.deleteItem(indexSet: indexset, items: viewModel.items)
+                    viewModel.deleteItem(indexSet: indexset)
                 })
                 .onMove(perform: viewModel.moveItem)
         }
         .listStyle(.plain)
+    }
+    
+    private func makeEmptyItemsView() -> some View {
+        VStack(spacing: 2) {
+            Image(systemName: Constants.cloudSunImageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 44, height: 44)
+            Text(Constants.cloudIsEmptyText)
+                .font(.callout)
+        }
+        .animation(.easeIn(duration: 2), value: viewModel.itemsEmpty) // does not work :(
+        .opacity(0.5)
     }
 }
 

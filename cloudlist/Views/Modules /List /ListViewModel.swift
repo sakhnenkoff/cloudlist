@@ -12,8 +12,8 @@ final class ListViewModel: ObservableObject {
     @Published var items: [Item] = []
     @Published var currentToDoItemText: String = ""
     @Published var shouldShakeView = false
-    @Published var shakeOffset: CGFloat = 0
     @Published var isDataLoading = false
+    @Published var shakeOffset: CGFloat = 0
     
     private var domainModel: AppDomainModel
     
@@ -25,6 +25,10 @@ final class ListViewModel: ObservableObject {
     
     var itemsEmpty: Bool {
         return items.isEmpty
+    }
+    
+    var shouldDisplayEmptyItemsView: Bool {
+        return !isDataLoading
     }
     
     init(domainModel: AppDomainModel) {
@@ -60,8 +64,8 @@ final class ListViewModel: ObservableObject {
     
     // MARK: Data Manupilation
     
-    func deleteItem(indexSet: IndexSet, items: [Item]) {
-        domainModel.deleteItem(indexSet: indexSet, items: items)
+    func deleteItem(indexSet: IndexSet) {
+        domainModel.deleteItem(indexSet: indexSet)
     }
     
     func moveItem(from: IndexSet, to: Int) {
