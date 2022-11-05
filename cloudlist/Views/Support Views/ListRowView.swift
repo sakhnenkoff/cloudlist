@@ -29,7 +29,7 @@ struct ListRowView: View {
     var body: some View {
         HStack {
             Image(systemName: item.isCompleted ? "checkmark.circle" : "circle")
-                .foregroundColor(item.isCompleted ? .theme.cloudBlue : .gray.opacity(0.6))
+                .foregroundColor(item.isCompleted ? .theme.coperRose : .gray.opacity(0.6))
                 .onTapGesture {
                     viewModel.onUpdateItem(item)
                 }
@@ -42,7 +42,7 @@ struct ListRowView: View {
             
             Text("\(position)")
                 .font(.system(size: 24, weight: .bold))
-                .foregroundColor(priorityColor)
+                .foregroundColor(priorityColor.opacity(0.6))
             
         }
         .opacity(item.isCompleted ? 0.6 : 1)

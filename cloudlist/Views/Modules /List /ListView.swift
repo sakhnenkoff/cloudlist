@@ -16,41 +16,52 @@ struct ListView: View {
     }
     
     @EnvironmentObject var viewModel: ListViewModel
+    @EnvironmentObject var authService: AuthenticationService
+    
+    @State private var showingCompositionView = false
     
     var body: some View {
-        Group {
-            if !viewModel.itemsEmpty {
-                makeListView()
-                    .disabled(viewModel.isDataLoading)
-            } else if viewModel.shouldDisplayEmptyItemsView {
-                makeEmptyItemsView()
+        NavigationView {
+            ZStack {
+                if !viewModel.itemsEmpty {
+                    makeListView()
+                        .disabled(viewModel.isDataLoading)
+                } else if viewModel.shouldDisplayEmptyItemsView {
+                    makeEmptyItemsView()
+                }
+                
+                makeComposeButton()
             }
-        }
-        .overlay {
-            if viewModel.isDataLoading && viewModel.itemsEmpty {
-                ProgressView("☁️ is loading")
-                    .progressViewStyle(.circular)
-                    .padding()
-            } else if viewModel.isDataLoading {
-                ProgressView()
-            }
-        }
-        .navigationTitle(Constants.navigationTitle)
-        .onAppear {
-            viewModel.viewWillAppear()
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if !viewModel.itemsEmpty { EditButton() } else { EmptyView() }
-            }
-
-            ToolbarItem(placement: .navigationBarTrailing) {
-                NavigationLink(Constants.addText) {
-                    AddView(todoItemText: $viewModel.currentToDoItemText)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay {
+                if viewModel.isDataLoading && viewModel.itemsEmpty {
+                    ProgressView("☁️ is loading")
+                        .frame(width: 124, height: 124)
+                        .progressViewStyle(.circular)
+                        .background(Material.regularMaterial)
+                        .cornerRadius(10)
+                } else if viewModel.isDataLoading {
+                    ProgressView()
                 }
             }
+            .navigationTitle(Constants.navigationTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                viewModel.viewWillAppear()
+            }
+            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    if !viewModel.itemsEmpty { EditButton() } else { EmptyView() }
+//                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    NavigationLink(Constants.addText) {
+//                        AddView(todoItemText: $viewModel.currentToDoItemText)
+//                    }
+//                }
+                makeSignOutButton()
+            }
+            .tint(.theme.lavenderGray)
         }
-        .tint(.theme.cloudBlue)
     }
     
     private func makeListView() -> some View {
@@ -61,7 +72,7 @@ struct ListView: View {
                 })
                 .onMove(perform: viewModel.moveItem)
         }
-        .listStyle(.plain)
+        .listStyle(.insetGrouped)
     }
     
     private func makeEmptyItemsView() -> some View {
@@ -76,13 +87,63 @@ struct ListView: View {
         .animation(.easeIn(duration: 2), value: viewModel.itemsEmpty) // does not work :(
         .opacity(0.5)
     }
+
+    private func makeSignOutButton() -> some View {
+        Button(
+            action: {
+                authService.signOut()
+            },
+            label: {
+                Text("Sign Out")
+                    .bold()
+                    .font(.footnote)
+                    .foregroundColor(.white)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 20)
+                    .background(
+                        Capsule()
+                            .foregroundColor(Color.theme.lavenderGray)
+                    )
+            }
+        )
+    }
+    
+    private func makeComposeButton() -> some View {
+        VStack(spacing: 0) {
+            Spacer()
+            HStack(spacing: 0) {
+                Spacer()
+                Button(
+                    action: {
+                        showingCompositionView = true
+                    },
+                    label: {
+                        Image(systemName: "plus")
+                            .resizable()
+                            .padding()
+                            .frame(width: 50, height: 50)
+                            .background(Color.theme.lavenderGray)
+                            .clipShape(Circle())
+                            .foregroundColor(.white)
+                    }
+                )
+                .padding(30)
+                .fullScreenCover(isPresented: $showingCompositionView) {
+                    CompositionView(
+                        thoughtText: $viewModel.currentToDoItemText,
+                        postItem: viewModel.createAndAppend
+                    )
+                }
+            }
+        }
+    }
 }
 
 struct ListView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             ListView()
-                .environmentObject(ListViewModel(domainModel: AppFactory.createDomainModel()))
+                .environmentObject(ListViewModel(domainModel: AppDependencyFactory.createDomainModel()))
         }
     }
 }

@@ -19,21 +19,24 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct cloudlistApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    private let appDomainModel = AppFactory.createDomainModel()
-    private var authModel: AuthenticationModel {
-        appDomainModel.createAuthModel()
-    }
+    @StateObject var appDomainModel = AppDependencyFactory.createDomainModel()
     
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                Group {
+            Group {
+                if appDomainModel.networkService.user == nil {
+                    AuthView()
+                        .environmentObject(appDomainModel.networkService.authService)
+                } else {
                     ListView()
+                        .environmentObject(appDomainModel.createListViewModel())
+                        .environmentObject(appDomainModel.networkService.authService)
                 }
             }
             .tint(.theme.cloudBlue)
-            .environmentObject(appDomainModel.createListViewModel())
-            .environmentObject(authModel)
+            .onAppear {
+                appDomainModel.networkService.listenToAuthState()
+            }
         }
     }
 }

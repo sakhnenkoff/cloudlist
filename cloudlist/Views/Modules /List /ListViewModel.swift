@@ -41,14 +41,6 @@ final class ListViewModel: ObservableObject {
         
         domainModel.$isDataLoading
             .assign(to: &$isDataLoading)
-        
-        /// subscription to save items on change, should be moved to the domain model
-//        $items
-//            .dropFirst()
-//            .sink { [weak self] items in
-//                self?.domainModel.saveToDatabase(items: items)
-//            }
-//            .store(in: &cancellables)
     }
     
     // MARK: Input
@@ -73,6 +65,7 @@ final class ListViewModel: ObservableObject {
     func createAndAppend() {
         guard !currentToDoItemText.isEmpty else { return }
         domainModel.createAndAppend(item: .init(id: UUID().uuidString, title: currentToDoItemText))
+        currentToDoItemText = ""
     }
     
     func onUpdateItem(_ item: Item) {

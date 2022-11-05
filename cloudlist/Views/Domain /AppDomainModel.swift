@@ -7,14 +7,16 @@
 
 import SwiftUI
 import Combine
+import FirebaseAuth
 
-final class AppDomainModel {
+final class AppDomainModel: ObservableObject {
+    @Published var user: User?
     @Published var items: [Item] = []
     @Published var rawItems: [Item] = []
     @Published var isDataLoading = false
     
     // MARK: Dependencies
-    private let networkService: NetworkServiceProtocol
+    internal var networkService: NetworkServiceProtocol
     private let persistenceService: PersistenceServiceProtocol
     
     private var cancellables = Set<AnyCancellable>()
@@ -23,8 +25,10 @@ final class AppDomainModel {
         networkService: NetworkServiceProtocol,
         persistenceService: PersistenceServiceProtocol
     ) {
-        self.networkService = networkService
         self.persistenceService = persistenceService
+        self.networkService = networkService
+        
+        self.networkService.domainModel = self
         
         $rawItems
             .map { $0.sorted { $0.isCompleted && !$1.isCompleted } }
@@ -64,11 +68,18 @@ final class AppDomainModel {
     /// should be optimised in the future
     func fetchFromDatabase(completion: (() -> Void)? = nil) {
         isDataLoading = true
-        networkService.loadData { [weak self] items in
+        networkService.loadData { [weak self] result in
             DispatchQueue.main.async {
-                self?.rawItems = items
-                self?.isDataLoading = false
-                completion?()
+                switch result {
+                case let .success(items):
+                    self?.rawItems = items
+                    self?.isDataLoading = false
+                    completion?()
+                case let .failure(error):
+                    print(error.errorDescription)
+                    self?.isDataLoading = false
+                    completion?()
+                }
             }
         }
     }
@@ -81,11 +92,11 @@ final class AppDomainModel {
                 guard
                     error == nil else
                 {
-                    print(error?.localizedDescription)
                     self?.isDataLoading = false
-                    self?.fetchFromDatabase()
                     return
                 }
+                self?.isDataLoading = false
+                self?.fetchFromDatabase()
             }
         }
     }
@@ -93,11 +104,11 @@ final class AppDomainModel {
     /// update status for the particular item in the database
     func updateItem(item: Item) {
         isDataLoading = true
-        networkService.updateStatus(for: item) { error, _ in
-            if let error { print(error.localizedDescription) }
-        }
         
-        fetchFromDatabase()
+        networkService.updateStatus(for: item) { [weak self] error, _ in
+            if let error { print(error.localizedDescription) }
+            self?.fetchFromDatabase()
+        }
     }
     
     // MARK: Persistence
@@ -115,13 +126,9 @@ final class AppDomainModel {
     }
 }
 
-// MARK: Model Assembly
+// MARK: ViewModel Assembly
 extension AppDomainModel {
     func createListViewModel() -> ListViewModel {
         ListViewModel(domainModel: self)
-    }
-    
-    func createAuthModel() -> AuthenticationModel {
-        AuthenticationModel()
     }
 }
