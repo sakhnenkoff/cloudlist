@@ -57,13 +57,11 @@ final class ListViewModel: ObservableObject {
     }
     
     // MARK: View Output
-    
     func viewWillAppear() {
         domainModel.viewWillApeear()
     }
     
     // MARK: Data Manupilation
-    
     func deleteItem(indexSet: IndexSet) {
         domainModel.deleteItem(indexSet: indexSet)
     }
@@ -78,14 +76,10 @@ final class ListViewModel: ObservableObject {
     }
     
     func onUpdateItem(_ item: Item) {
-        if let index = items.firstIndex(where: { $0.id == item.id }) {
-//            domainModel.items[index] = item.updateCompletion()
-            domainModel.updateItem(item: item.updateCompletion())
-        }
+        domainModel.updateItem(item: item.updateCompletion())
     }
     
     // MARK: Persistence
-    
     func saveItems(items: [Item]) {
         domainModel.saveItemsToDefaults(items: items)
     }

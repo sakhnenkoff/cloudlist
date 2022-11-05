@@ -20,16 +20,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct cloudlistApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     private let appDomainModel = AppFactory.createDomainModel()
+    private var authModel: AuthenticationModel {
+        appDomainModel.createAuthModel()
+    }
     
     var body: some Scene {
         WindowGroup {
             NavigationView {
-                ZStack {
+                Group {
                     ListView()
                 }
             }
             .tint(.theme.cloudBlue)
-            .environmentObject(appDomainModel.crateListViewModel())
+            .environmentObject(appDomainModel.createListViewModel())
+            .environmentObject(authModel)
         }
     }
 }

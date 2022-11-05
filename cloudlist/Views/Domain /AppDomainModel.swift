@@ -10,6 +10,7 @@ import Combine
 
 final class AppDomainModel {
     @Published var items: [Item] = []
+    @Published var rawItems: [Item] = []
     @Published var isDataLoading = false
     
     // MARK: Dependencies
@@ -25,15 +26,9 @@ final class AppDomainModel {
         self.networkService = networkService
         self.persistenceService = persistenceService
         
-        #warning("for debug purposes only")
-        $items.sink { items in
-            print("\(items) 🐞")
-        }
-        .store(in: &cancellables)
-    }
-    
-    func crateListViewModel() -> ListViewModel {
-        ListViewModel(domainModel: self)
+        $rawItems
+            .map { $0.sorted { $0.isCompleted && !$1.isCompleted } }
+            .assign(to: &$items)
     }
     
     // MARK: Output
@@ -71,7 +66,7 @@ final class AppDomainModel {
         isDataLoading = true
         networkService.loadData { [weak self] items in
             DispatchQueue.main.async {
-                self?.items = items
+                self?.rawItems = items
                 self?.isDataLoading = false
                 completion?()
             }
@@ -117,5 +112,16 @@ final class AppDomainModel {
     
     func saveItemsToDefaults(items: [Item]) {
         persistenceService.updateData(with: items)
+    }
+}
+
+// MARK: Model Assembly
+extension AppDomainModel {
+    func createListViewModel() -> ListViewModel {
+        ListViewModel(domainModel: self)
+    }
+    
+    func createAuthModel() -> AuthenticationModel {
+        AuthenticationModel()
     }
 }

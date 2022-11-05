@@ -29,6 +29,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:824497024297:ios:5fd02a979d36ce0d57db38</string>
+	<string>1:824497024297:ios:0bb776a28c5add1057db38</string>
+	<key>DATABASE_URL</key>
+	<string>https://cloudlist-365319-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>
